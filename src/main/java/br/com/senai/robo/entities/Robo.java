@@ -1,5 +1,6 @@
 package br.com.senai.robo.entities;
 
+import br.com.senai.robo.acao.Acao;
 import br.com.senai.robo.dto.DadosAtualizacaoRobo;
 import br.com.senai.robo.dto.DadosCadastroRobo;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "robo")
@@ -23,6 +25,8 @@ public class Robo {
     private String tecnologia;
     @Column(columnDefinition = "tinyint")
     private Boolean ativo;
+    @OneToMany(mappedBy = "robo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Acao> acoes = new ArrayList<>();
 
     public Robo(DadosCadastroRobo dados) {
         this.ativo = true;
@@ -42,4 +46,5 @@ public class Robo {
     public void excluir() { this.ativo = false; }
 
     public void reativar() { this.ativo = true; }
+
 }

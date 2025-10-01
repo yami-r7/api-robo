@@ -18,12 +18,11 @@ public class Obstaculo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "data_hora_registro", nullable = false) // Mapeia para a coluna 'data_hora_registro'
+    @Column(name = "data_hora_registro", nullable = false)
     private LocalDateTime dataHoraRegistro;
 
-    // Define o relacionamento: Muitos Obstáculos para Um Robô
-    @ManyToOne(fetch = FetchType.EAGER) // EAGER para sempre trazer os dados do robô junto com o obstáculo
-    @JoinColumn(name = "idrobo", nullable = false) // Especifica a coluna de chave estrangeira (FK) nesta tabela
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idrobo", nullable = false)
     private Robo robo;
 
 

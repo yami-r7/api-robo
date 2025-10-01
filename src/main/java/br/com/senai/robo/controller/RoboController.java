@@ -6,7 +6,9 @@ import br.com.senai.robo.dto.DadosDetalhamentoRobo;
 import br.com.senai.robo.dto.DadosListagemRobo;
 import br.com.senai.robo.entities.Robo;
 import br.com.senai.robo.infra.ApiResponse;
+import br.com.senai.robo.infra.exception.ValidacaoException;
 import br.com.senai.robo.repository.RoboRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/robos")
+@Tag(name = "Robôs", description = "API para o gerenciamento completo de robôs")
 public class RoboController {
 
     @Autowired
@@ -77,6 +80,10 @@ public class RoboController {
         var robo = repository.getReferenceById(id);
         robo.excluir();
 
+        if (!robo.getAtivo()) {
+            throw new ValidacaoException("Este robô já está inativo.");
+        }
+
         var response = new ApiResponse<> (
                 LocalDateTime.now(),
                 "Robô desativado com sucesso!",
@@ -91,6 +98,10 @@ public class RoboController {
     public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> reativar(@PathVariable Long id) {
         var robo = repository.getReferenceById(id);
         robo.reativar();
+
+        if (robo.getAtivo()) {
+            throw new ValidacaoException("Este robô já está ativo.");
+        }
 
         var response = new ApiResponse<>(
                 LocalDateTime.now(),

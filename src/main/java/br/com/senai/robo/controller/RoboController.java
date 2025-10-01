@@ -1,12 +1,12 @@
 package br.com.senai.robo.controller;
 
-import br.com.senai.robo.dto.DadosAtualizacaoRobo;
-import br.com.senai.robo.dto.DadosCadastroRobo;
-import br.com.senai.robo.dto.DadosDetalhamentoRobo;
-import br.com.senai.robo.dto.DadosListagemRobo;
+import br.com.senai.robo.acao.Acao;
+import br.com.senai.robo.acao.DadosRegistroAcaoArduino;
+import br.com.senai.robo.dto.*;
 import br.com.senai.robo.entities.Robo;
 import br.com.senai.robo.infra.ApiResponse;
 import br.com.senai.robo.infra.exception.ValidacaoException;
+import br.com.senai.robo.repository.AcaoRepository;
 import br.com.senai.robo.repository.RoboRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +28,9 @@ public class RoboController {
 
     @Autowired
     private RoboRepository repository;
+
+    @Autowired
+    private AcaoRepository acaoRepository;
 
     @PostMapping
     @Transactional
@@ -110,5 +113,21 @@ public class RoboController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{idrobo}/acoes")
+    @Transactional
+    public ResponseEntity<ApiResponse<DadosDetalhamentoAcao>> registrarAcaoPeloRobo(@PathVariable Long idrobo, @RequestBody @Valid DadosRegistroAcaoArduino dados, UriComponentsBuilder uriBuilder) {
+        var robo = repository.getReferenceById(idrobo);
+        if (!robo.getAtivo()) {
+            throw new ValidacaoException("Ação não registrada: o robô com id " + idrobo + " está inativo.");
+        }
+
+        var acao = new Acao(null, robo, dados.descricao(), LocalDateTime.now(), dados.distancia());
+        acaoRepository.save(acao);
+
+        var uri = uriBuilder.path("/acoes/{id}").buildAndExpand(acao.getId()).toUri();
+        var response = new ApiResponse<>(LocalDateTime.now(), "Ação registrada pelo robô!", new DadosDetalhamentoAcao(acao));
+        return ResponseEntity.created(uri).body(response);
     }
 }

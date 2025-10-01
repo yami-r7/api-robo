@@ -14,13 +14,11 @@ import java.time.LocalDateTime;
 public class Acao {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idrobo")
     private Robo robo;
-
     private String descricao;
-
     @Column(name = "data_hora_inicio")
     private LocalDateTime dataHoraInicio;
+    private Float distancia;
 }

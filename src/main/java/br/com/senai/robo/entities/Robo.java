@@ -3,6 +3,7 @@ package br.com.senai.robo.entities;
 import br.com.senai.robo.acao.Acao;
 import br.com.senai.robo.dto.DadosAtualizacaoRobo;
 import br.com.senai.robo.dto.DadosCadastroRobo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class Robo {
     @Column(columnDefinition = "tinyint")
     private Boolean ativo;
     @OneToMany(mappedBy = "robo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Acao> acoes = new ArrayList<>();
 
     public Robo(DadosCadastroRobo dados) {

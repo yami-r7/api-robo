@@ -1,6 +1,7 @@
 package br.com.senai.robo.acao;
 
 import br.com.senai.robo.entities.Robo;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public class Acao {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idrobo")
+    @JsonBackReference
     private Robo robo;
     private String descricao;
     @Column(name = "data_hora_inicio")

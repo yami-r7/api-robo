@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/robos")
 @Tag(name = "Robôs", description = "API para o gerenciamento completo de robôs")
+@CrossOrigin(origins = "*")
 public class RoboController {
 
     @Autowired

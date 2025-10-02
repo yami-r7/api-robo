@@ -81,11 +81,12 @@ public class RoboController {
     @Transactional
     public ResponseEntity<ApiResponse<Object>> excluir(@PathVariable Long id) {
         var robo = repository.getReferenceById(id);
-        robo.excluir();
 
         if (!robo.getAtivo()) {
             throw new ValidacaoException("Este robô já está inativo.");
         }
+
+        robo.excluir();
 
         var response = new ApiResponse<> (
                 LocalDateTime.now(),
@@ -100,11 +101,12 @@ public class RoboController {
     @Transactional
     public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> reativar(@PathVariable Long id) {
         var robo = repository.getReferenceById(id);
-        robo.reativar();
 
         if (robo.getAtivo()) {
             throw new ValidacaoException("Este robô já está ativo.");
         }
+
+        robo.reativar();
 
         var response = new ApiResponse<>(
                 LocalDateTime.now(),

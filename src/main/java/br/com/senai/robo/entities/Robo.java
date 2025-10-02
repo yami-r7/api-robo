@@ -4,10 +4,7 @@ import br.com.senai.robo.acao.Acao;
 import br.com.senai.robo.dto.DadosAtualizacaoRobo;
 import br.com.senai.robo.dto.DadosCadastroRobo;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,6 +8,9 @@ import br.com.senai.robo.infra.ApiResponse;
 import br.com.senai.robo.infra.exception.ValidacaoException;
 import br.com.senai.robo.repository.AcaoRepository;
 import br.com.senai.robo.repository.RoboRepository;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,12 @@ public class RoboController {
     }
 
     @GetMapping
+    @Parameters({
+            @Parameter(name = "page", description = "Número da página que você quer visualizar (começa em 0)", example = "0"),
+            @Parameter(name = "size", description = "Quantidade de resultados por página", example = "10"),
+            @Parameter(name = "sort", description = "Critério de ordenação. Formato: campo,direção (asc/desc). Ex: nome,asc",
+                    example = "nome,asc", schema = @Schema(type = "string"))
+    })
     public ResponseEntity<Page<DadosListagemRobo>> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
         var page = repository.findAllByAtivoTrue(paginacao).map(DadosListagemRobo::new);
         return ResponseEntity.ok(page);

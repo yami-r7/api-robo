@@ -13,7 +13,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "http://127.0.0.1:5500",
-                        "https://api-robo-production.up.railway.app"
+                        "https://api-robo-production.up.railway.app",
+                        "http://localhost:8081"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT"); // Métodos HTTP permitidos
     }

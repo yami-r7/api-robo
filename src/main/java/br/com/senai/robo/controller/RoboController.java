@@ -57,6 +57,18 @@ public class RoboController {
         return ResponseEntity.ok(page);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<DadosDetalhamentoRobo> detalhar(@PathVariable Long id) {
+        var roboEncontrado = repository.findById(id);
+
+        if (roboEncontrado.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var robo = roboEncontrado.get();
+        return ResponseEntity.ok(new DadosDetalhamentoRobo(robo));
+    }
+
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> atualizar(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoRobo dados) {

@@ -2,6 +2,7 @@ package br.com.senai.robo.controller;
 
 import br.com.senai.robo.dto.DadosDetalhamentoAcao;
 import br.com.senai.robo.repository.AcaoRepository;
+import br.com.senai.robo.service.AcaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,17 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AcaoController {
 
     @Autowired
-    private AcaoRepository repository;
+    private AcaoService acaoService;
 
     @GetMapping("/acoes")
     public ResponseEntity<Page<DadosDetalhamentoAcao>> listarTodasAsAcoes(@PageableDefault(size = 10, sort = {"dataHoraInicio"}) Pageable paginacao) {
-        var page = repository.findAll(paginacao).map(DadosDetalhamentoAcao::new);
+        var page = acaoService.listarTodas(paginacao);
         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/robos/{idrobo}/acoes")
     public ResponseEntity<Page<DadosDetalhamentoAcao>> listarAcoesPorRobo(@PathVariable Long idrobo, @PageableDefault(size = 10, sort = {"dataHoraInicio"}) Pageable paginacao) {
-        var page = repository.findAllByRoboId(idrobo, paginacao).map(DadosDetalhamentoAcao::new);
+        var page = acaoService.listarPorRobo(idrobo, paginacao);
         return ResponseEntity.ok(page);
     }
 

@@ -8,6 +8,7 @@ import br.com.senai.robo.infra.ApiResponse;
 import br.com.senai.robo.infra.exception.ValidacaoException;
 import br.com.senai.robo.repository.AcaoRepository;
 import br.com.senai.robo.repository.RoboRepository;
+import br.com.senai.robo.service.RoboService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,121 +29,61 @@ import java.time.LocalDateTime;
 public class RoboController {
 
     @Autowired
-    private RoboRepository repository;
-
-    @Autowired
-    private AcaoRepository acaoRepository;
+    private RoboService roboService;
 
     @PostMapping
-    @Transactional
     public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroRobo dados, UriComponentsBuilder uriBuilder) {
-        var robo = new Robo(dados);
-        repository.save(robo);
-
-        var roboDetalhado = new DadosDetalhamentoRobo(robo);
-
-        var response = new ApiResponse<>(
-                LocalDateTime.now(),
-                "Robô cadastrado com sucesso!",
-                roboDetalhado
-        );
-
-        var uri = uriBuilder.path("/robos/{id}").buildAndExpand(robo.getId()).toUri();
-        return ResponseEntity.created(uri).body(new ApiResponse<>(LocalDateTime.now(), "Robô cadastrado!", new DadosDetalhamentoRobo(robo)));
+        var robo = roboService.cadastrar(dados);
+        var uri = uriBuilder.path("/robos/{id}").buildAndExpand(robo.id()).toUri();
+        return ResponseEntity.created(uri).body(new ApiResponse<>(LocalDateTime.now(), "Robô cadastrado!", robo));
     }
 
     @GetMapping
     public ResponseEntity<Page<DadosListagemRobo>> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
-        var page = repository.findAllByAtivoTrue(paginacao).map(DadosListagemRobo::new);
+        var page = roboService.listar(paginacao);
         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DadosDetalhamentoRobo> detalhar(@PathVariable Long id) {
-        var roboEncontrado = repository.findById(id);
-
-        if (roboEncontrado.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var robo = roboEncontrado.get();
-        return ResponseEntity.ok(new DadosDetalhamentoRobo(robo));
+    public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> detalhar(@PathVariable Long id) {
+        var roboDetalhado = roboService.detalhar(id);
+        var response = new ApiResponse<>(LocalDateTime.now(), "Detalhes do robô obtidos com sucesso.", roboDetalhado);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    @Transactional
     public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> atualizar(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoRobo dados) {
-        var roboEncontrado = repository.findById(id);
-
-        if (roboEncontrado.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var robo = roboEncontrado.get();
-        robo.atualizarInformacoes(dados);
-
+        var roboAtualizado = roboService.atualizar(id, dados);
         var response = new ApiResponse<>(
                 LocalDateTime.now(),
                 "Dados do robô atualizados com sucesso!",
-                new DadosDetalhamentoRobo(robo)
+                roboAtualizado
         );
-
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
     public ResponseEntity<ApiResponse<Object>> excluir(@PathVariable Long id) {
-        var robo = repository.getReferenceById(id);
-
-        if (!robo.getAtivo()) {
-            throw new ValidacaoException("Este robô já está inativo.");
-        }
-
-        robo.excluir();
-
-        var response = new ApiResponse<> (
-                LocalDateTime.now(),
-                "Robô desativado com sucesso!",
-                null
-        );
-
-        return ResponseEntity.ok(response);
+        roboService.excluir(id);
+        return ResponseEntity.ok(new ApiResponse<>(LocalDateTime.now(), "Robô desativado com sucesso!", null));
     }
 
     @PutMapping("/{id}/ativar")
-    @Transactional
     public ResponseEntity<ApiResponse<DadosDetalhamentoRobo>> reativar(@PathVariable Long id) {
-        var robo = repository.getReferenceById(id);
-
-        if (robo.getAtivo()) {
-            throw new ValidacaoException("Este robô já está ativo.");
-        }
-
-        robo.reativar();
-
+        var roboReativado = roboService.reativar(id);
         var response = new ApiResponse<>(
                 LocalDateTime.now(),
                 "Robô reativado com sucesso!",
-                new DadosDetalhamentoRobo(robo)
+                roboReativado
         );
-
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{idrobo}/acoes")
-    @Transactional
     public ResponseEntity<ApiResponse<DadosDetalhamentoAcao>> registrarAcaoPeloRobo(@PathVariable Long idrobo, @RequestBody @Valid DadosRegistroAcaoArduino dados, UriComponentsBuilder uriBuilder) {
-        var robo = repository.getReferenceById(idrobo);
-        if (!robo.getAtivo()) {
-            throw new ValidacaoException("Ação não registrada: o robô com id " + idrobo + " está inativo.");
-        }
-
-        var acao = new Acao(null, robo, dados.descricao(), LocalDateTime.now(), dados.distancia());
-        acaoRepository.save(acao);
-
-        var uri = uriBuilder.path("/acoes/{id}").buildAndExpand(acao.getId()).toUri();
-        var response = new ApiResponse<>(LocalDateTime.now(), "Ação registrada pelo robô!", new DadosDetalhamentoAcao(acao));
+        var acaoDetalhada = roboService.registrarAcaoPeloRobo(idrobo, dados);
+        var uri = uriBuilder.path("/acoes/{id}").buildAndExpand(acaoDetalhada.id()).toUri();
+        var response = new ApiResponse<>(LocalDateTime.now(), "Ação registrada pelo robô!", acaoDetalhada);
         return ResponseEntity.created(uri).body(response);
     }
 }
